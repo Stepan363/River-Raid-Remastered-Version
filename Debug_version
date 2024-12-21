@@ -1,0 +1,240 @@
+'''
+Notes: Image resizer:
+https://the-image-editor.com/image/download/cmVzaXplX2ltYWdl
+
+'''
+
+
+
+
+import pygame
+from random import randint
+import pgzrun
+pygame.init()
+import sys
+import pygame as pg
+
+pg.init()
+import time
+start_ticks=pygame.time.get_ticks() #starter tick
+
+    
+#getting system's screen resolution, making it full-screen
+screen = pygame.display.set_mode()
+width, height = screen.get_size()
+
+SCREEN_WIDTH = width
+SCREEN_HEIGHT =  height
+pygame.display.toggle_fullscreen()
+
+#changing game-name, River Raid 
+
+pygame.display.set_caption("River Raid Remastered Version")
+
+
+#Colour RGB's for game.
+BG = (0, 128, 255)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
+BLUE = (0, 0, 255)
+WHITE = (255, 255, 255)
+
+
+#For main-menu, not needed now.
+#pygame.mouse.set_visible(False)
+
+#creating plane, collision configuration and postition of aircraft.
+
+plane = pygame.image.load("planne.png").convert_alpha()
+plane_mask = pygame.mask.from_surface(plane)
+
+# airplane bbox
+plane_rect = plane.get_rect()
+plane_rect.x = width/2
+plane_rect.y = height/1.2
+
+#creating map_for_collision, also positioning the map
+
+map = pygame.image.load("Level-1.png").convert_alpha()
+math = width/1000
+map = pg.transform.scale(map, ((math*1000)+4, 50000))
+map_mask = pygame.mask.from_surface(map)
+
+# map rendering coords
+map_rect = map.get_rect()
+map_rect.y = -50000
+
+
+#position plane rectangle
+#plane_rect.topleft = (350, 250)
+
+#game loop
+
+game_speed = 3
+looped_times = -2
+
+def plane_crashed():
+    global looped_times, plane_rect
+    pygame.mixer.music.load("explosion.wav")
+    pygame.mixer.music.play()
+    #loads images of exploded planes.
+    plane1 = pygame.image.load('planne1_exp.png')
+    plane2 = pygame.image.load('planne2_exp.png')
+    plane3 = pygame.image.load('planne3_exp.png')
+    plane4 = pygame.image.load('planne4_exp.png')
+    plane5 = pygame.image.load('planne5_exp.png')
+    #animation of planes when they explode, game freezes and only shows animations where you have crashed.
+    if looped_times == 0:
+        screen.blit(plane1,(plane_rect.x, plane_rect.y)) 
+        
+        #pygame.display.update()
+        time.sleep(0.1)
+        #screen.fill(BG)
+        
+    
+    if looped_times == 1:
+        screen.blit(plane2,(plane_rect.x, plane_rect.y)) 
+        #pygame.display.update()
+        time.sleep(0.1)
+        #screen.fill(BG)
+        
+    
+    if looped_times == 2:
+        screen.blit(plane3,(plane_rect.x, plane_rect.y))
+        #pygame.display.update()
+        time.sleep(0.1)
+        #screen.fill(BG)
+        
+    if looped_times == 3:
+        screen.blit(plane4,(plane_rect.x, plane_rect.y)) 
+        #pygame.display.update()
+        time.sleep(0.1)
+        #screen.fill(BG)
+        
+        
+    #looped times 4, we finish the animations, and return the plane to it's original spot.
+    if looped_times == 4:
+        screen.blit(plane5,(plane_rect.x, plane_rect.y)) 
+        #pygame.display.update()
+        time.sleep(0.1)
+        #screen.fill(BG)       
+        
+
+        plane_rect.x = width/2
+        plane_rect.y = height/1.2
+        map_rect.y = -50000
+        looped_times = -1
+        pygame.mixer.music.load("sound2.wav")
+        pygame.mixer.music.play()
+        
+    if map_mask.overlap(plane_mask, (plane_rect.x - map_rect.x, plane_rect.y - map_rect.y)):
+        looped_times += 1
+        print(looped_times)
+        
+        return True
+    #increment looped times to show sequenced animations.
+    
+        
+    return False
+
+#------------------------------------------------
+game_is_paused = 0
+seconds = 0
+start_ticks=pygame.time.get_ticks()
+def paused_game():
+    global game_is_paused, game_speed, seconds, start_ticks
+    seconds=(pygame.time.get_ticks()-start_ticks)/1000
+    
+    
+    pygame.init()
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_p] and seconds >= 5:
+        start_ticks=pygame.time.get_ticks()
+        
+        if game_is_paused == 1:
+            game_is_paused = 0 
+            game_speed = 3
+            
+
+
+        else:
+            game_is_paused = 1
+            
+    
+    if game_is_paused == 0:
+        
+        return False
+        
+    else:
+        return True
+    
+    
+    
+pygame.mixer.music.load("sound2.wav")
+pygame.mixer.music.play()
+
+ticks_milsec=pygame.time.get_ticks()
+
+while True:
+    # audio playing, restarts track when ended.
+    seconds=(pygame.time.get_ticks()-ticks_milsec)/1000
+    if seconds >= 19:
+        pygame.mixer.music.load("sound2.wav")
+        ticks_milsec=pygame.time.get_ticks()
+        pygame.mixer.music.play()
+    #collision detection
+    if map_mask.overlap(plane_mask, (plane_rect.x - map_rect.x, plane_rect.y - map_rect.y)):
+        #print("go!")
+        plane_crashed()
+        
+    else:
+        if paused_game() == False:
+            
+            map_rect.y = map_rect.y + game_speed
+            
+        else:
+            game_speed = 0
+            
+        #get mouse coordinates
+        pos = pygame.mouse.get_pos()
+        
+        #update background
+        screen.fill(BG)
+        
+        #check collision between plane and map.
+        
+        #draw plane and level
+        screen.blit(plane, plane_rect)
+        screen.blit(map, map_rect)
+
+        #event handler from keyboard.
+        keys = pygame.key.get_pressed()
+        
+
+        
+        #Controls of the map, and plane    
+        if paused_game() == False:
+            if keys[pygame.K_RIGHT] and plane_rect.x <= 1872:
+                plane_rect.x = plane_rect.x + 2
+            if keys[pygame.K_LEFT] and plane_rect.x >= -8:
+                plane_rect.x = plane_rect.x - 2
+            if keys[pygame.K_UP]:
+                if game_speed < 5:
+                    game_speed = game_speed + 0.05
+                
+            if keys[pygame.K_DOWN]:
+                if game_speed > 1:
+                    game_speed = game_speed - 0.05
+    
+    for event in pygame.event.get():
+        pygame.display.update()
+        if event.type == pygame.QUIT:
+            run = False
+    #print(game_speed)
+    #updates display ( Very important for making games, I always forgot. )
+    
+    pygame.display.flip()
+    
+    
+    if keys[pygame.K_q]:
+        pygame.quit()
