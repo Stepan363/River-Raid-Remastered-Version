@@ -9,7 +9,6 @@ https://the-image-editor.com/image/download/cmVzaXplX2ltYWdl
 #https://www.youtube.com/watch?v=H2r2N7D56Uw&ab_channel=TechWithTim
 
 
-
 import pygame
 from random import randint
 import pgzrun
@@ -74,13 +73,17 @@ map_rect.y = -50000
 #plane_rect.topleft = (350, 250)
 #loading turret assets, adding them into the game.
 turret = pygame.image.load("turret.png").convert_alpha()
+img_size = (128, 128)
+turret = pygame.transform.scale(turret, img_size)
 turret_mask = pygame.mask.from_surface(turret)
 turret_rect = turret.get_rect()
-turret_rect.x = 360*math
-turret_rect.y = -1500
+
+#turret_rect.x = 360*math
+#turret_rect.y = -1500
 
 #turret's bullet import images and stuff.
 turret_bul = pygame.image.load("turret_bullet.png").convert_alpha()
+turret_bul = pygame.transform.scale(turret_bul, img_size)
 turretbul_mask = pygame.mask.from_surface(turret_bul)
 turretbul_rect = turret_bul.get_rect()
 
@@ -90,7 +93,10 @@ game_speed = 3
 looped_times = -2
 
 time_elapsed=pygame.time.get_ticks()
-
+level_one_positions_x = [200*math, 360*math, 520*math, 680*math, 840*math, 1000*math, 1160*math]
+level_one_positions_y = [-1000, -1500,-2000,-2500,-3000,-3500,-4000]
+turret_rect.x = level_one_positions_x[0]
+turret_rect.y = level_one_positions_y[0]
 def fade(width, height): 
     fade = pygame.Surface((width, height))
     fade.fill((255,0,188))
@@ -106,26 +112,35 @@ def fade(width, height):
 
 picked_coordinates = 0
 def turret_animation():
-    turretbul_rect.x = turretbul_rect.x + 12
-    global turret, turret_rect, turret_mask, time_elapsed, picked_coordinates
-    turretbul_rect.y = turret_rect.y - 4
+    turretbul_rect.x = turretbul_rect.x + 2
+    global turret, turret_rect, turret_mask, time_elapsed, picked_coordinates, level_one_positions_x, level_one_positions_y
+    turretbul_rect.y = turret_rect.y - 8
     seconds=(pygame.time.get_ticks()-time_elapsed)/1000
-    if seconds >= 0.5: 
+    if seconds >= 2.5: 
         time_elapsed=pygame.time.get_ticks()
         turretbul_rect.x = turret_rect.x + 70
+    math = width/1000
     #the locations where the turret has to be, after disappears off the screen. Coords.
-    level_one_positions_x = [200*math, 360*math, 520*math, 680*math, 840*math, 1000*math, 1160*math]
-    level_one_positions_y = [-1000, -1500,-2000,-2500,-3000,-3500,-4000]
+    level_one_positions_x = [200*math, 362.5*math, 425*math, 200*math, 840*math, 1000*math, 1160*math]
+    level_one_positions_y = [-1000, -200, -200,-200,-3000,-3500,-4000]
     # turret_draw_on_screen
     #the place where they all teleport to their allocated places, after they disappear off screen.
-    
-
     calculated_math_for_erase = height-(height/1.2)
+
+
+    print(picked_coordinates, turret_rect.x, turret_rect.y, plane_rect.y + calculated_math_for_erase)
+
+     
     #when the turret disappears out of view, move it to it's new position. 
+    turret_rect.x = level_one_positions_x[picked_coordinates]
+    
     if plane_rect.y+calculated_math_for_erase < turret_rect.y: 
-        turret_rect.x = level_one_positions_x[picked_coordinates]
-        turret_rect.y = level_one_positions_y[picked_coordinates]
+        turretbul_rect.x = turret_rect.x + 70
         picked_coordinates = picked_coordinates + 1
+        turretbul_rect.x = turret_rect.x + 70
+        turret_rect.y = level_one_positions_y[picked_coordinates]
+        turretbul_rect.x = turret_rect.x + 70
+        return True
 
 
 
@@ -137,16 +152,18 @@ def turret_animation():
 def plane_exploded():
     global game_speed, picked_coordinates
     game_speed = 0
-    
+    picked_coordinates = 0
+    turret_rect.x = level_one_positions_x[picked_coordinates]
+    turret_rect.y = level_one_positions_y[picked_coordinates]
     pygame.display.update()
     pygame.mixer.music.load("explosion2.wav")
     pygame.mixer.music.play()
     fade(width, height)
     game_speed = 3
     map_rect.y = -50000
-    turret_rect.y = -1000
+    #turret_rect.y = -1000
     turret_animation()
-    picked_coordinates = 0
+    
     
     pygame.mixer.music.load("sound2.wav")
     pygame.mixer.music.play()
@@ -154,7 +171,9 @@ def plane_exploded():
 #game loop
 def plane_crashed():
     global looped_times, plane_rect, picked_coordinates
-    turret_rect.y = -1000
+    #turret_rect.y = -1000
+    turret_rect.x = level_one_positions_x[picked_coordinates]
+    turret_rect.y = level_one_positions_y[picked_coordinates]
     pygame.mixer.music.load("explosion.wav")
     pygame.mixer.music.play()
     #loads images of exploded planes.
@@ -334,6 +353,7 @@ while True:
     
     pygame.display.flip()
     
-    
+    if turret_animation() == True:
+        turretbul_rect.x = turret_rect.x + 70
     if keys[pygame.K_q]:
         pygame.quit()
