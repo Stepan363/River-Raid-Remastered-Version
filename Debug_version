@@ -30,7 +30,7 @@ width, height = screen.get_size()
 
 SCREEN_WIDTH = width
 SCREEN_HEIGHT =  height
-#pygame.display.toggle_fullscreen()
+pygame.display.toggle_fullscreen()
 
 #changing game-name, River Raid 
 
@@ -57,8 +57,14 @@ plane_mask = pygame.mask.from_surface(plane)
 plane_rect = plane.get_rect()
 plane_rect.x = width/2
 plane_rect.y = height/1.2
-
+math = width/1000
+math_height = height/1080
 #creating map_for_collision, also positioning the map
+map_lvl_2 = pygame.image.load("Level-2.png").convert_alpha()
+map_lvl_2 = pg.transform.scale(map_lvl_2, ((math*1000)+4, 50000))
+map2_mask = pygame.mask.from_surface(map_lvl_2)
+map_rect2 = map_lvl_2.get_rect()
+map_rect2.y = -110000
 
 map = pygame.image.load("Level-1_test.png").convert_alpha()
 math = width/1000
@@ -122,8 +128,8 @@ def turret_animation():
         turretbul_rect.x = turret_rect.x + 70
     math = width/1000
     #the locations where the turret has to be, after disappears off the screen. Coords.
-    level_one_positions_x = [200*math, 362.5*math, 425*math, 20*math, 250*math, 200*math, 170*math, 10*math, 650*math, 10*math, 215*math, ]
-    level_one_positions_y = [-1000, -200, -200,-200,-200,-700,-1650,-850, -450,-300, -2000, -200]
+    level_one_positions_x = [200*math, 362.5*math, 425*math, 20*math, 250*math, 200*math, 170*math, 10*math, 650*math, 10*math, 215*math, -99999999]
+    level_one_positions_y = [-1000, -200, -200,-200,-200,-700,-1650,-850, -450,-300, -2000, -999999999]
     # turret_draw_on_screen
     #the place where they all teleport to their allocated places, after they disappear off screen.
     calculated_math_for_erase = height-(height/1.2)
@@ -290,7 +296,13 @@ moved_distance = 0
 while True:
     pygame.font.init()
     my_font = pygame.font.SysFont('nanummyeongjo', 80)
-    text_surface = my_font.render('Level 1', False, (0, 0, 0))     
+    if map_rect.y < 0 and map_rect.y > -50000:
+        level = 1
+    elif map_rect.y > -100000 and map_rect.y <= 50000:
+        level = 2
+    elif map_rect.y <= -100000:
+        level = 3
+    text_surface = my_font.render('Level ' + str(level), False, (0, 0, 0))     
     
 
 
@@ -318,6 +330,7 @@ while True:
             if turret_rect.y < -50:
                 pass
             map_rect.y = map_rect.y + game_speed
+            map_rect2.y = map_rect.y + game_speed
             turret_rect.y = turret_rect.y + game_speed
 
             #print(game_speed)
@@ -336,9 +349,10 @@ while True:
         screen.blit(plane, plane_rect)
         screen.blit(map, map_rect)
         screen.blit(turret, turret_rect)
-        if seconds2 < 0.02:
-            m1 = height / 2
-            m2 = width / 2
+        screen.blit(map_lvl_2, map_rect2)
+        if seconds2 < 999999999999999:
+            m1 = height - 80
+            m2 = width / 100
             screen.blit(text_surface, (m2,m1))
 
         screen.blit(turret_bul, turretbul_rect)
