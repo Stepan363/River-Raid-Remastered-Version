@@ -7,9 +7,11 @@ https://the-image-editor.com/image/download/cmVzaXplX2ltYWdl
 #
 #screen fading code
 #https://www.youtube.com/watch?v=H2r2N7D56Uw&ab_channel=TechWithTim
-
-
 import pygame
+pygame.font.init()
+
+
+
 from random import randint
 import pgzrun
 pygame.init()
@@ -21,14 +23,14 @@ import time
 #essentials to start the game.
 start_ticks=pygame.time.get_ticks() #starter tick
 
-    
+print(pygame.font.get_fonts())
 #getting system's screen resolution, making it full-screen
 screen = pygame.display.set_mode()
 width, height = screen.get_size()
 
 SCREEN_WIDTH = width
 SCREEN_HEIGHT =  height
-pygame.display.toggle_fullscreen()
+#pygame.display.toggle_fullscreen()
 
 #changing game-name, River Raid 
 
@@ -44,7 +46,7 @@ WHITE = (255, 255, 255)
 
 
 #For main-menu, not needed now.
-#pygame.mouse.set_visible(False)
+pygame.mouse.set_visible(False)
 
 #creating plane, collision configuration and postition of aircraft.
 
@@ -99,30 +101,29 @@ turret_rect.x = level_one_positions_x[0]
 turret_rect.y = level_one_positions_y[0]
 def fade(width, height): 
     fade = pygame.Surface((width, height))
-    fade.fill((255,0,188))
+    fade.fill((0,0,0))
     for alpha in range(0, 50):
+        
         fade.set_alpha(alpha)
         #redrawWindow()
         screen.blit(fade, (0,0))
         pygame.display.update()
         time.sleep(0.05)
-        
-
-        
+    
 
 picked_coordinates = 0
 def turret_animation():
-    turretbul_rect.x = turretbul_rect.x + 2
+    turretbul_rect.x = turretbul_rect.x + 4
     global turret, turret_rect, turret_mask, time_elapsed, picked_coordinates, level_one_positions_x, level_one_positions_y
     turretbul_rect.y = turret_rect.y - 8
     seconds=(pygame.time.get_ticks()-time_elapsed)/1000
-    if seconds >= 2.5: 
+    if seconds >= 1.2: 
         time_elapsed=pygame.time.get_ticks()
         turretbul_rect.x = turret_rect.x + 70
     math = width/1000
     #the locations where the turret has to be, after disappears off the screen. Coords.
-    level_one_positions_x = [200*math, 362.5*math, 425*math, 200*math, 840*math, 1000*math, 1160*math]
-    level_one_positions_y = [-1000, -200, -200,-200,-3000,-3500,-4000]
+    level_one_positions_x = [200*math, 362.5*math, 425*math, 20*math, 250*math, 200*math, 170*math, 10*math, 650*math, 10*math, 215*math, ]
+    level_one_positions_y = [-1000, -200, -200,-200,-200,-700,-1650,-850, -450,-300, -2000, -200]
     # turret_draw_on_screen
     #the place where they all teleport to their allocated places, after they disappear off screen.
     calculated_math_for_erase = height-(height/1.2)
@@ -135,11 +136,11 @@ def turret_animation():
     turret_rect.x = level_one_positions_x[picked_coordinates]
     
     if plane_rect.y+calculated_math_for_erase < turret_rect.y: 
-        turretbul_rect.x = turret_rect.x + 70
+        #turretbul_rect.x = turret_rect.x + 70
         picked_coordinates = picked_coordinates + 1
-        turretbul_rect.x = turret_rect.x + 70
+        #turretbul_rect.x = turret_rect.x + 70
         turret_rect.y = level_one_positions_y[picked_coordinates]
-        turretbul_rect.x = turret_rect.x + 70
+        #turretbul_rect.x = turret_rect.x + 70
         return True
 
 
@@ -170,7 +171,7 @@ def plane_exploded():
 
 #game loop
 def plane_crashed():
-    global looped_times, plane_rect, picked_coordinates
+    global looped_times, plane_rect, picked_coordinates, ticks_milsec2
     #turret_rect.y = -1000
     turret_rect.x = level_one_positions_x[picked_coordinates]
     turret_rect.y = level_one_positions_y[picked_coordinates]
@@ -214,12 +215,13 @@ def plane_crashed():
         
     #looped times 4, we finish the animations, and return the plane to it's original spot.
     if looped_times == 4:
+        pygame.font.init()
         screen.blit(plane5,(plane_rect.x, plane_rect.y)) 
         #pygame.display.update()
         time.sleep(0.1)
         #screen.fill(BG)       
         fade(width, height)
-
+        
         plane_rect.x = width/2
         plane_rect.y = height/1.2
         map_rect.y = -50000
@@ -230,10 +232,11 @@ def plane_crashed():
 
         
         
+        
     if map_mask.overlap(plane_mask, (plane_rect.x - map_rect.x, plane_rect.y - map_rect.y)):
         looped_times += 1
         #print(looped_times)
-        
+        #ticks_milsec2=pygame.time.get_ticks()
         return True
     #increment looped times to show sequenced animations.
     
@@ -245,6 +248,7 @@ def plane_crashed():
 game_is_paused = 0
 seconds = 0
 seconds1 = 0
+seconds2 = 0
 start_ticks=pygame.time.get_ticks()
 def paused_game():
     global game_is_paused, game_speed, seconds, start_ticks
@@ -280,8 +284,19 @@ pygame.mixer.music.play()
 
 ticks_milsec=pygame.time.get_ticks()
 ticks_milsec1=pygame.time.get_ticks()
+ticks_milsec2=pygame.time.get_ticks()
+
 moved_distance = 0
 while True:
+    pygame.font.init()
+    my_font = pygame.font.SysFont('nanummyeongjo', 80)
+    text_surface = my_font.render('Level 1', False, (0, 0, 0))     
+    
+
+
+
+
+
     turret_animation()
     # audio playing, restarts track when ended.
     seconds=(pygame.time.get_ticks()-ticks_milsec)/1000
@@ -316,11 +331,16 @@ while True:
         screen.fill(BG)
         
         #check collision between plane and map.
-        
+        seconds2=(pygame.time.get_ticks()-ticks_milsec2)/1000
         #draw plane and level
         screen.blit(plane, plane_rect)
         screen.blit(map, map_rect)
         screen.blit(turret, turret_rect)
+        if seconds2 < 0.02:
+            m1 = height / 2
+            m2 = width / 2
+            screen.blit(text_surface, (m2,m1))
+
         screen.blit(turret_bul, turretbul_rect)
         #event handler from keyboard.
         keys = pygame.key.get_pressed()
@@ -354,6 +374,7 @@ while True:
     pygame.display.flip()
     
     if turret_animation() == True:
-        turretbul_rect.x = turret_rect.x + 70
+        pass
+        #turretbul_rect.x = turret_rect.x + 70
     if keys[pygame.K_q]:
         pygame.quit()
