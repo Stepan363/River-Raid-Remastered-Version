@@ -15,3 +15,8 @@ Countries, New Zealand, Singapore, Etc.
 
 
 Space Map, Final level.
+
+Improvement / Bugs:
+
+Plane's guns, so that multiple bullets fly through the screen when multiple shots are "spammed".
+
