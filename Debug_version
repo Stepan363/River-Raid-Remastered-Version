@@ -49,9 +49,18 @@ WHITE = (255, 255, 255)
 pygame.mouse.set_visible(False)
 
 #creating plane, collision configuration and postition of aircraft.
+plane_bullet = pygame.image.load("planes_bullet.png").convert_alpha()
+planebullet_mask = pygame.mask.from_surface(plane_bullet)
+planebullet_rect = plane_bullet.get_rect()
+
+
+
 
 plane = pygame.image.load("planne.png").convert_alpha()
 plane_mask = pygame.mask.from_surface(plane)
+#load image, electric gates.
+
+
 
 # airplane bbox
 plane_rect = plane.get_rect()
@@ -115,12 +124,32 @@ def fade(width, height):
         screen.blit(fade, (0,0))
         pygame.display.update()
         time.sleep(0.05)
-    
+seconds_when_shot = 0
+ticks_passed=pygame.time.get_ticks()
+def plane_shoot_command():
+        global ticks_passed, seconds_when_shot
+        seconds_when_shot=(pygame.time.get_ticks()-ticks_passed)/1000
+        
+
+        if seconds_when_shot < 0.5:
+            planebullet_rect.y = planebullet_rect.y  - 20
+        else:
+            ticks_passed=pygame.time.get_ticks()
+            planebullet_rect.x = -9999
+        
+        
+        
+
 
 picked_coordinates = 0
 def turret_animation():
-    turretbul_rect.x = turretbul_rect.x + 4
     global turret, turret_rect, turret_mask, time_elapsed, picked_coordinates, level_one_positions_x, level_one_positions_y
+    if turret_mask.overlap(planebullet_mask, (planebullet_rect.x - turret_rect.x, planebullet_rect.y - turret_rect.y)):
+        picked_coordinates = picked_coordinates + 1
+        turret_rect.y = level_one_positions_y[picked_coordinates]
+        turret_rect.x = level_one_positions_x[picked_coordinates]
+    turretbul_rect.x = turretbul_rect.x + 4
+    
     turretbul_rect.y = turret_rect.y - 8
     seconds=(pygame.time.get_ticks()-time_elapsed)/1000
     if seconds >= 1.2: 
@@ -135,7 +164,7 @@ def turret_animation():
     calculated_math_for_erase = height-(height/1.2)
 
 
-    print(picked_coordinates, turret_rect.x, turret_rect.y, plane_rect.y + calculated_math_for_erase)
+    #print(picked_coordinates, turret_rect.x, turret_rect.y, plane_rect.y + calculated_math_for_erase)
 
      
     #when the turret disappears out of view, move it to it's new position. 
@@ -170,7 +199,7 @@ def plane_exploded():
     map_rect.y = -50000
     #turret_rect.y = -1000
     turret_animation()
-    
+    map_rect2.y = -110000
     
     pygame.mixer.music.load("sound2.wav")
     pygame.mixer.music.play()
@@ -231,6 +260,7 @@ def plane_crashed():
         plane_rect.x = width/2
         plane_rect.y = height/1.2
         map_rect.y = -50000
+        map_rect2.y = -110000
         looped_times = -1
         pygame.mixer.music.load("sound2.wav")
         pygame.mixer.music.play()
@@ -239,7 +269,7 @@ def plane_crashed():
         
         
         
-    if map_mask.overlap(plane_mask, (plane_rect.x - map_rect.x, plane_rect.y - map_rect.y)):
+    if map_mask.overlap(plane_mask, (plane_rect.x - map_rect.x, plane_rect.y - map_rect.y)) or  map2_mask.overlap(plane_mask, (plane_rect.x - map_rect2.x, plane_rect.y - map_rect2.y)):
         looped_times += 1
         #print(looped_times)
         #ticks_milsec2=pygame.time.get_ticks()
@@ -316,26 +346,27 @@ while True:
         pygame.mixer.music.load("sound2.wav")
         ticks_milsec=pygame.time.get_ticks()
         pygame.mixer.music.play()
-    #collision detection
+    #collision detection, with map or one of the turrets.
     if map_mask.overlap(plane_mask, (plane_rect.x - map_rect.x, plane_rect.y - map_rect.y)):
         #print("go!")
         plane_crashed()
-    #if plane_mask.overlap(turretbul_mask, (plane_rect.x - turretbul_rect.x, plane_rect.y - turretbul_rect.y)):
-    #    plane_crashed()
+    elif map2_mask.overlap(plane_mask, (plane_rect.x - map_rect2.x, plane_rect.y - map_rect2.y)):
+        plane_crashed()
+    
     elif turretbul_mask.overlap(plane_mask, (plane_rect.x - turretbul_rect.x, plane_rect.y - turretbul_rect.y)):
         plane_exploded()
-
+        
     else:
         if paused_game() == False:
             if turret_rect.y < -50:
                 pass
             map_rect.y = map_rect.y + game_speed
-            map_rect2.y = map_rect.y + game_speed
+            map_rect2.y = map_rect2.y + game_speed
             turret_rect.y = turret_rect.y + game_speed
 
             #print(game_speed)
         else:
-            game_speed = 0 
+            game_speed = 0
         moved_distance = moved_distance + game_speed
         #get mouse coordinates
         pos = pygame.mouse.get_pos()
@@ -350,6 +381,7 @@ while True:
         screen.blit(map, map_rect)
         screen.blit(turret, turret_rect)
         screen.blit(map_lvl_2, map_rect2)
+        screen.blit(plane_bullet, planebullet_rect)
         if seconds2 < 999999999999999:
             m1 = height - 80
             m2 = width / 100
@@ -371,7 +403,12 @@ while True:
                 ticks_milsec1=pygame.time.get_ticks()
                 if game_speed < 5:
                     game_speed = game_speed + 1
-                
+            if seconds_when_shot < 0.5:
+                plane_shoot_command()
+            if keys[pygame.K_SPACE]:
+                plane_shoot_command()
+                planebullet_rect.x = plane_rect.x-3
+                planebullet_rect.y = plane_rect.y-40
             if keys[pygame.K_DOWN] and seconds1 > 0.1:
                 ticks_milsec1=pygame.time.get_ticks()
                 if game_speed > 1:
