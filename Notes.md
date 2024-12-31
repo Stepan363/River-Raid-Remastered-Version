@@ -21,3 +21,5 @@ Improvement / Bugs:
 Plane's guns, so that multiple bullets fly through the screen when multiple shots are "spammed".
 When plane crashes, turrets y coordinate offset math throws them farther from their desired location. 
 
+Animation of when turrets get hit, explode
+Fix explosion animation when turret hits aircraft.
