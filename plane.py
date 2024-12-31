@@ -23,14 +23,14 @@ import time
 #essentials to start the game.
 start_ticks=pygame.time.get_ticks() #starter tick
 
-print(pygame.font.get_fonts())
+#print(pygame.font.get_fonts())
 #getting system's screen resolution, making it full-screen
 screen = pygame.display.set_mode()
 width, height = screen.get_size()
 
 SCREEN_WIDTH = width
 SCREEN_HEIGHT =  height
-pygame.display.toggle_fullscreen()
+
 
 #changing game-name, River Raid 
 
@@ -131,8 +131,8 @@ def plane_shoot_command():
         seconds_when_shot=(pygame.time.get_ticks()-ticks_passed)/1000
         
 
-        if seconds_when_shot < 0.5:
-            planebullet_rect.y = planebullet_rect.y  - 20
+        if seconds_when_shot < 0.2:
+            planebullet_rect.y = planebullet_rect.y  - 50
         else:
             ticks_passed=pygame.time.get_ticks()
             planebullet_rect.x = -9999
@@ -141,21 +141,27 @@ def plane_shoot_command():
         
 
 the_chosen_one = -1
+
 picked_coordinates = 0
+
 def turret_animation():
     global turret, turret_rect, turret_mask, time_elapsed, picked_coordinates, level_one_positions_x, level_one_positions_y, the_math, the_math_2, the_chosen_one
+    #if plane_crashed() == True:
+        
     if turret_mask.overlap(planebullet_mask, (planebullet_rect.x - turret_rect.x, planebullet_rect.y - turret_rect.y)):
         picked_coordinates = picked_coordinates + 1
         if the_chosen_one == 0:
+            #print("the_math", the_math)
             turret_rect.y = level_one_positions_y[picked_coordinates] - the_math
         elif the_chosen_one == 1:
+            #print("the_math2", the_math_2)
             turret_rect.y = level_one_positions_y[picked_coordinates] - the_math_2
         turret_rect.x = level_one_positions_x[picked_coordinates]
     turretbul_rect.x = turretbul_rect.x + 4
     
     turretbul_rect.y = turret_rect.y - 8
     seconds=(pygame.time.get_ticks()-time_elapsed)/1000
-    if seconds >= 1.2: 
+    if seconds >= 2: 
         time_elapsed=pygame.time.get_ticks()
         turretbul_rect.x = turret_rect.x + 70
     math = width/1000
@@ -179,6 +185,7 @@ def turret_animation():
     #when the turret disappears out of view, move it to it's new position. 
     turret_rect.x = level_one_positions_x[picked_coordinates]
     
+    
     if plane_rect.y+calculated_math_for_erase < turret_rect.y: 
         #turretbul_rect.x = turret_rect.x + 70
         picked_coordinates = picked_coordinates + 1
@@ -192,20 +199,20 @@ def turret_animation():
 
 
 
-    
+
     
     
 
 
 def plane_exploded():
-    global game_speed, picked_coordinates
+    global game_speed, picked_coordinates, the_math, the_math_2 ,the_chosen_one
     game_speed = 0
+    the_chosen_one = -1
+    the_math = 0
+    the_math_2 = 0
     picked_coordinates = 0
     turret_rect.x = level_one_positions_x[picked_coordinates]
-    if the_chosen_one == 0:
-        turret_rect.y = level_one_positions_y[picked_coordinates] - the_math
-    elif the_chosen_one == 1:
-        turret_rect.y = level_one_positions_y[picked_coordinates] - the_math_2
+    turret_rect.y = level_one_positions_y[picked_coordinates]
     pygame.display.update()
     pygame.mixer.music.load("sounds/explosion2.wav")
     pygame.mixer.music.play()
@@ -221,13 +228,15 @@ def plane_exploded():
 
 #game loop
 def plane_crashed():
-    global looped_times, plane_rect, picked_coordinates, ticks_milsec2, the_chosen_one
+    global looped_times, plane_rect, picked_coordinates, ticks_milsec2, the_chosen_one, the_math_2, the_math
     #turret_rect.y = -1000
+    the_chosen_one = -1
+
+    the_math = 0
+    the_math_2 = 0
+    picked_coordinates = 0
     turret_rect.x = level_one_positions_x[picked_coordinates]
-    if the_chosen_one == 0:
-        turret_rect.y = level_one_positions_y[picked_coordinates] - the_math
-    elif the_chosen_one == 1:
-        turret_rect.y = level_one_positions_y[picked_coordinates] - the_math_2
+    turret_rect.y = level_one_positions_y[picked_coordinates]
     pygame.mixer.music.load("sounds/explosion.wav")
     pygame.mixer.music.play()
     #loads images of exploded planes.
@@ -279,7 +288,7 @@ def plane_crashed():
         plane_rect.y = height/1.2
         map_rect.y = -50000
         map_rect2.y = -110000
-        looped_times = -1
+        picked_coordinates = 0
         pygame.mixer.music.load("sounds/sound2.wav")
         pygame.mixer.music.play()
         turret_animation()
@@ -297,7 +306,7 @@ def plane_crashed():
         
     return False
 
-
+pygame.display.toggle_fullscreen()
 #------------------------------------------------
 game_is_paused = 0
 seconds = 0
@@ -441,9 +450,6 @@ while True:
     #updates display ( Very important for making games, I always forgot. )
     
     pygame.display.flip()
-    
-    if turret_animation() == True:
-        pass
         #turretbul_rect.x = turret_rect.x + 70
     if keys[pygame.K_q]:
         pygame.quit()
