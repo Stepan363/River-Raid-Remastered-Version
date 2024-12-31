@@ -131,8 +131,8 @@ def plane_shoot_command():
         seconds_when_shot=(pygame.time.get_ticks()-ticks_passed)/1000
         
 
-        if seconds_when_shot < 0.2:
-            planebullet_rect.y = planebullet_rect.y  - 50
+        if seconds_when_shot < 0.5:
+            planebullet_rect.y = planebullet_rect.y  - 15 
         else:
             ticks_passed=pygame.time.get_ticks()
             planebullet_rect.x = -9999
@@ -143,13 +143,14 @@ def plane_shoot_command():
 the_chosen_one = -1
 
 picked_coordinates = 0
-
+score = 0
 def turret_animation():
-    global turret, turret_rect, turret_mask, time_elapsed, picked_coordinates, level_one_positions_x, level_one_positions_y, the_math, the_math_2, the_chosen_one
+    global turret, score, turret_rect, turret_mask, time_elapsed, picked_coordinates, level_one_positions_x, level_one_positions_y, the_math, the_math_2, the_chosen_one
     #if plane_crashed() == True:
-        
+    
     if turret_mask.overlap(planebullet_mask, (planebullet_rect.x - turret_rect.x, planebullet_rect.y - turret_rect.y)):
         picked_coordinates = picked_coordinates + 1
+        score = score + 10
         if the_chosen_one == 0:
             #print("the_math", the_math)
             turret_rect.y = level_one_positions_y[picked_coordinates] - the_math
@@ -205,8 +206,9 @@ def turret_animation():
 
 
 def plane_exploded():
-    global game_speed, picked_coordinates, the_math, the_math_2 ,the_chosen_one
+    global game_speed, picked_coordinates, the_math, the_math_2 ,the_chosen_one, score
     game_speed = 0
+    score = 0
     the_chosen_one = -1
     the_math = 0
     the_math_2 = 0
@@ -228,7 +230,7 @@ def plane_exploded():
 
 #game loop
 def plane_crashed():
-    global looped_times, plane_rect, picked_coordinates, ticks_milsec2, the_chosen_one, the_math_2, the_math
+    global looped_times, plane_rect, picked_coordinates, ticks_milsec2, the_chosen_one, the_math_2, the_math, score
     #turret_rect.y = -1000
     the_chosen_one = -1
 
@@ -289,6 +291,7 @@ def plane_crashed():
         map_rect.y = -50000
         map_rect2.y = -110000
         picked_coordinates = 0
+        score = 0
         pygame.mixer.music.load("sounds/sound2.wav")
         pygame.mixer.music.play()
         turret_animation()
@@ -359,7 +362,8 @@ while True:
         level = 2
     elif map_rect.y <= -100000:
         level = 3
-    text_surface = my_font.render('Level ' + str(level), False, (0, 0, 0))     
+    text_surface = my_font.render('Level ' + str(level), False, (0, 0, 0))
+    text_surface2 = my_font.render('Score ' + str(score), False, (0, 0, 0))       
     
 
 
@@ -413,6 +417,9 @@ while True:
             m1 = height - 80
             m2 = width / 100
             screen.blit(text_surface, (m2,m1))
+        m1 = height - 80
+        m2 = width - 300
+        screen.blit(text_surface2, (m2,m1))
 
         screen.blit(turret_bul, turretbul_rect)
         #event handler from keyboard.
