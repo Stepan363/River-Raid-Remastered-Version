@@ -4,7 +4,7 @@ https://the-image-editor.com/image/download/cmVzaXplX2ltYWdl
 
 '''
 #Minus is up, positive is down.
-#
+#test
 #screen fading code
 #https://www.youtube.com/watch?v=H2r2N7D56Uw&ab_channel=TechWithTim
 import pygame
@@ -49,14 +49,14 @@ WHITE = (255, 255, 255)
 pygame.mouse.set_visible(False)
 
 #creating plane, collision configuration and postition of aircraft.
-plane_bullet = pygame.image.load("planes_bullet.png").convert_alpha()
+plane_bullet = pygame.image.load("images/planes_bullet.png").convert_alpha()
 planebullet_mask = pygame.mask.from_surface(plane_bullet)
 planebullet_rect = plane_bullet.get_rect()
 
 
 
 
-plane = pygame.image.load("planne.png").convert_alpha()
+plane = pygame.image.load("images/planne.png").convert_alpha()
 plane_mask = pygame.mask.from_surface(plane)
 #load image, electric gates.
 
@@ -69,13 +69,13 @@ plane_rect.y = height/1.2
 math = width/1000
 math_height = height/1080
 #creating map_for_collision, also positioning the map
-map_lvl_2 = pygame.image.load("Level-2.png").convert_alpha()
+map_lvl_2 = pygame.image.load("images/Level-2.png").convert_alpha()
 map_lvl_2 = pg.transform.scale(map_lvl_2, ((math*1000)+4, 50000))
 map2_mask = pygame.mask.from_surface(map_lvl_2)
 map_rect2 = map_lvl_2.get_rect()
 map_rect2.y = -110000
 
-map = pygame.image.load("Level-1_test.png").convert_alpha()
+map = pygame.image.load("images/Level-1_test.png").convert_alpha()
 math = width/1000
 math_height = height/1080
 map = pg.transform.scale(map, ((math*1000)+4, 50000))
@@ -89,7 +89,7 @@ map_rect.y = -50000
 #position plane rectangle
 #plane_rect.topleft = (350, 250)
 #loading turret assets, adding them into the game.
-turret = pygame.image.load("turret.png").convert_alpha()
+turret = pygame.image.load("images/turret.png").convert_alpha()
 img_size = (128, 128)
 turret = pygame.transform.scale(turret, img_size)
 turret_mask = pygame.mask.from_surface(turret)
@@ -99,7 +99,7 @@ turret_rect = turret.get_rect()
 #turret_rect.y = -1500
 
 #turret's bullet import images and stuff.
-turret_bul = pygame.image.load("turret_bullet.png").convert_alpha()
+turret_bul = pygame.image.load("images/turret_bullet.png").convert_alpha()
 turret_bul = pygame.transform.scale(turret_bul, img_size)
 turretbul_mask = pygame.mask.from_surface(turret_bul)
 turretbul_rect = turret_bul.get_rect()
@@ -207,7 +207,7 @@ def plane_exploded():
     elif the_chosen_one == 1:
         turret_rect.y = level_one_positions_y[picked_coordinates] - the_math_2
     pygame.display.update()
-    pygame.mixer.music.load("explosion2.wav")
+    pygame.mixer.music.load("sounds/explosion2.wav")
     pygame.mixer.music.play()
     fade(width, height)
     game_speed = 3
@@ -216,26 +216,26 @@ def plane_exploded():
     turret_animation()
     map_rect2.y = -110000
     
-    pygame.mixer.music.load("sound2.wav")
+    pygame.mixer.music.load("sounds/sound2.wav")
     pygame.mixer.music.play()
 
 #game loop
 def plane_crashed():
-    global looped_times, plane_rect, picked_coordinates, ticks_milsec2
+    global looped_times, plane_rect, picked_coordinates, ticks_milsec2, the_chosen_one
     #turret_rect.y = -1000
     turret_rect.x = level_one_positions_x[picked_coordinates]
     if the_chosen_one == 0:
         turret_rect.y = level_one_positions_y[picked_coordinates] - the_math
     elif the_chosen_one == 1:
         turret_rect.y = level_one_positions_y[picked_coordinates] - the_math_2
-    pygame.mixer.music.load("explosion.wav")
+    pygame.mixer.music.load("sounds/explosion.wav")
     pygame.mixer.music.play()
     #loads images of exploded planes.
-    plane1 = pygame.image.load('planne1_exp.png')
-    plane2 = pygame.image.load('planne2_exp.png')
-    plane3 = pygame.image.load('planne3_exp.png')
-    plane4 = pygame.image.load('planne4_exp.png')
-    plane5 = pygame.image.load('planne5_exp.png')
+    plane1 = pygame.image.load('images/planne1_exp.png')
+    plane2 = pygame.image.load('images/planne2_exp.png')
+    plane3 = pygame.image.load('images/planne3_exp.png')
+    plane4 = pygame.image.load('images/planne4_exp.png')
+    plane5 = pygame.image.load('images/planne5_exp.png')
     picked_coordinates = 0
     #animation of planes when they explode, game freezes and only shows animations where you have crashed.
     if looped_times == 0:
@@ -274,13 +274,13 @@ def plane_crashed():
         time.sleep(0.1)
         #screen.fill(BG)       
         fade(width, height)
-        
+        the_chosen_one = -1
         plane_rect.x = width/2
         plane_rect.y = height/1.2
         map_rect.y = -50000
         map_rect2.y = -110000
         looped_times = -1
-        pygame.mixer.music.load("sound2.wav")
+        pygame.mixer.music.load("sounds/sound2.wav")
         pygame.mixer.music.play()
         turret_animation()
 
@@ -333,7 +333,7 @@ def paused_game():
     
     
     
-pygame.mixer.music.load("sound2.wav")
+pygame.mixer.music.load("sounds/sound2.wav")
 pygame.mixer.music.play()
 
 ticks_milsec=pygame.time.get_ticks()
@@ -361,7 +361,7 @@ while True:
     # audio playing, restarts track when ended.
     seconds=(pygame.time.get_ticks()-ticks_milsec)/1000
     if seconds >= 19:
-        pygame.mixer.music.load("sound2.wav")
+        pygame.mixer.music.load("sounds/sound2.wav")
         ticks_milsec=pygame.time.get_ticks()
         pygame.mixer.music.play()
     #collision detection, with map or one of the turrets.
