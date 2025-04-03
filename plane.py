@@ -114,6 +114,27 @@ level_one_positions_x = [200*math, 360*math, 520*math, 680*math, 840*math, 1000*
 level_one_positions_y = [-1000, -1500,-2000,-2500,-3000,-3500,-4000]
 turret_rect.x = level_one_positions_x[0]
 turret_rect.y = level_one_positions_y[0]
+
+
+
+
+bulletImg_array = []
+bulletX_array = []
+bulletY_array = []
+bullety_change = []
+
+def bullet_animation():
+    global space_key_pressed
+    print(space_key_pressed, len(bulletImg_array))
+    for i in range(space_key_pressed): #change this later, just for testing
+        bulletImg_array.append(pygame.image.load("images/planes_bullet.png"))
+        #plane_rect.#x or y
+        bulletX_array.append(plane_rect.x)
+        bulletY_array.append(plane_rect.y)
+        bullety_change.append(-15)
+     
+
+
 def fade(width, height): 
     fade = pygame.Surface((width, height))
     fade.fill((0,0,0))
@@ -138,13 +159,14 @@ def plane_shoot_command():
             planebullet_rect.x = -9999
         
         
-        
 
 the_chosen_one = -1
 
 picked_coordinates = 0
 score = 0
 def turret_animation():
+    global fps
+    fps = 999999999999999999
     global turret, score, turret_rect, turret_mask, time_elapsed, picked_coordinates, level_one_positions_x, level_one_positions_y, the_math, the_math_2, the_chosen_one
     #if plane_crashed() == True:
     
@@ -172,8 +194,8 @@ def turret_animation():
     # turret_draw_on_screen
     #the place where they all teleport to their allocated places, after they disappear off screen.
     calculated_math_for_erase = height-(height/1.2)
-
-
+    clock = pygame.time.Clock()
+    clock.tick(fps)
     #print(picked_coordinates, turret_rect.x, turret_rect.y, plane_rect.y + calculated_math_for_erase)
     
     if turret_rect.y >= 0:
@@ -347,11 +369,11 @@ def paused_game():
     
 pygame.mixer.music.load("sounds/sound2.wav")
 pygame.mixer.music.play()
-
+space_key_pressed = 0
 ticks_milsec=pygame.time.get_ticks()
 ticks_milsec1=pygame.time.get_ticks()
 ticks_milsec2=pygame.time.get_ticks()
-
+ticks_spacebar=pygame.time.get_ticks()
 moved_distance = 0
 while True:
     pygame.font.init()
@@ -413,6 +435,7 @@ while True:
         screen.blit(turret, turret_rect)
         screen.blit(map_lvl_2, map_rect2)
         screen.blit(plane_bullet, planebullet_rect)
+        
         if seconds2 < 999999999999999:
             m1 = height - 80
             m2 = width / 100
@@ -424,7 +447,12 @@ while True:
         screen.blit(turret_bul, turretbul_rect)
         #event handler from keyboard.
         keys = pygame.key.get_pressed()
+
         
+        for i in range(space_key_pressed ):
+            bulletY_array[i] += -15
+            screen.blit(bulletImg_array[i], (bulletX_array[i], bulletY_array[i]))
+
 
         
         #Controls of the map, and plane    
@@ -437,17 +465,18 @@ while True:
                 ticks_milsec1=pygame.time.get_ticks()
                 if game_speed < 5:
                     game_speed = game_speed + 1
-            if seconds_when_shot < 0.5:
-                plane_shoot_command()
-            if keys[pygame.K_SPACE]:
-                plane_shoot_command()
-                planebullet_rect.x = plane_rect.x-3
-                planebullet_rect.y = plane_rect.y-40
+
+            if keys[pygame.K_SPACE] and secondsspacebar > 0.1:
+                ticks_spacebar=pygame.time.get_ticks()
+                space_key_pressed += 1
+                bullet_animation()
+                
             if keys[pygame.K_DOWN] and seconds1 > 0.1:
                 ticks_milsec1=pygame.time.get_ticks()
                 if game_speed > 1:
                     game_speed = game_speed - 1
             seconds1=(pygame.time.get_ticks()-ticks_milsec1)/1000
+            secondsspacebar=(pygame.time.get_ticks()-ticks_spacebar)/1000
     
     for event in pygame.event.get():
         pygame.display.update()
@@ -459,4 +488,5 @@ while True:
     pygame.display.flip()
         #turretbul_rect.x = turret_rect.x + 70
     if keys[pygame.K_q]:
+        print(bulletX_array)
         pygame.quit()
