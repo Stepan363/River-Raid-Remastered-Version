@@ -125,7 +125,7 @@ bullety_change = []
 
 def bullet_animation():
     global space_key_pressed
-    print(space_key_pressed, len(bulletImg_array))
+    print(space_key_pressed, len(bulletY_array))
     for i in range(space_key_pressed): #change this later, just for testing
         bulletImg_array.append(pygame.image.load("images/planes_bullet.png"))
         #plane_rect.#x or y
@@ -147,16 +147,7 @@ def fade(width, height):
         time.sleep(0.05)
 seconds_when_shot = 0
 ticks_passed=pygame.time.get_ticks()
-def plane_shoot_command():
-        global ticks_passed, seconds_when_shot
-        seconds_when_shot=(pygame.time.get_ticks()-ticks_passed)/1000
-        
 
-        if seconds_when_shot < 0.5:
-            planebullet_rect.y = planebullet_rect.y  - 15 
-        else:
-            ticks_passed=pygame.time.get_ticks()
-            planebullet_rect.x = -9999
         
         
 
@@ -166,7 +157,7 @@ picked_coordinates = 0
 score = 0
 def turret_animation():
     global fps
-    fps = 999999999999999999
+    fps = 600
     global turret, score, turret_rect, turret_mask, time_elapsed, picked_coordinates, level_one_positions_x, level_one_positions_y, the_math, the_math_2, the_chosen_one
     #if plane_crashed() == True:
     
@@ -434,7 +425,7 @@ while True:
         screen.blit(map, map_rect)
         screen.blit(turret, turret_rect)
         screen.blit(map_lvl_2, map_rect2)
-        screen.blit(plane_bullet, planebullet_rect)
+        #screen.blit(plane_bullet, planebullet_rect)
         
         if seconds2 < 999999999999999:
             m1 = height - 80
@@ -452,6 +443,12 @@ while True:
         for i in range(space_key_pressed ):
             bulletY_array[i] += -15
             screen.blit(bulletImg_array[i], (bulletX_array[i], bulletY_array[i]))
+            if bulletY_array[i] < 0:
+                bulletY_array.pop(i)
+                bulletX_array.pop(i)
+                space_key_pressed -= 1
+                bulletImg_array.pop(i)    
+        
 
 
         
@@ -489,4 +486,8 @@ while True:
         #turretbul_rect.x = turret_rect.x + 70
     if keys[pygame.K_q]:
         print(bulletX_array)
+        print(bulletY_array)
+        print(space_key_pressed)
         pygame.quit()
+
+
