@@ -158,7 +158,7 @@ picked_coordinates = 0
 score = 0
 def turret_animation():
     global fps
-    fps = 600
+    fps = 100000
     global turret, score, turret_rect, turret_mask, time_elapsed, picked_coordinates, level_one_positions_x, level_one_positions_y, the_math, the_math_2, the_chosen_one
     #if plane_crashed() == True:
     
@@ -477,13 +477,13 @@ while True:
         
         #Controls of the map, and plane    
         if paused_game() == False:
-            if keys[pygame.K_RIGHT] and plane_rect.x <= 1872:
+            if keys[pygame.K_RIGHT] and plane_rect.x <= width - 30:
                 plane_rect.x = plane_rect.x + 2
             if keys[pygame.K_LEFT] and plane_rect.x >= -8:
                 plane_rect.x = plane_rect.x - 2
             if keys[pygame.K_UP] and seconds1 > 0.1:
                 ticks_milsec1=pygame.time.get_ticks()
-                if game_speed < 5:
+                if game_speed < 8:
                     game_speed = game_speed + 1
 
             if keys[pygame.K_SPACE] and secondsspacebar > 0.15:
