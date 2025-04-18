@@ -126,12 +126,12 @@ bullety_change = []
 def bullet_animation():
     global space_key_pressed
     print(space_key_pressed, len(bulletY_array))
-    for i in range(space_key_pressed): #change this later, just for testing
-        bulletImg_array.append(pygame.image.load("images/planes_bullet.png"))
-        #plane_rect.#x or y
-        bulletX_array.append(plane_rect.x)
-        bulletY_array.append(plane_rect.y)
-        bullety_change.append(-15)
+    
+    bulletImg_array.append(pygame.image.load("images/planes_bullet.png"))
+    #plane_rect.#x or y
+    bulletX_array.append(plane_rect.x)
+    bulletY_array.append(plane_rect.y)
+    bullety_change.append(-15)
      
 
 
@@ -148,7 +148,8 @@ def fade(width, height):
 seconds_when_shot = 0
 ticks_passed=pygame.time.get_ticks()
 
-        
+def helicopter_animation():
+    pass
         
 
 the_chosen_one = -1
@@ -180,8 +181,8 @@ def turret_animation():
         turretbul_rect.x = turret_rect.x + 70
     math = width/1000
     #the locations where the turret has to be, after disappears off the screen. Coords.
-    level_one_positions_x = [200*math, 362.5*math, 425*math, 20*math, 250*math, 200*math, 170*math, 10*math, 650*math, 10*math, 215*math, -99999999]
-    level_one_positions_y = [-1000, -200, -200,-200,-200,-700,-1650,-850, -450,-300, -2000, -999999999]
+    level_one_positions_x = [200*math, 362.5*math, 425*math, 20*math, 300*math, 200*math, 200*math, 20*math, 735*math, 10*math, 325*math, -99999999]
+    level_one_positions_y = [-1000, -200, -200,-200,-350,-1700,-400,-580, -450,-300, -2000, -999999999]
     # turret_draw_on_screen
     #the place where they all teleport to their allocated places, after they disappear off screen.
     calculated_math_for_erase = height-(height/1.2)
@@ -440,7 +441,7 @@ while True:
         keys = pygame.key.get_pressed()
 
         
-        for i in range(space_key_pressed ):
+        for i in range(len(bulletImg_array )-1):
             bulletY_array[i] += -15
             screen.blit(bulletImg_array[i], (bulletX_array[i], bulletY_array[i]))
             if bulletY_array[i] < 0:
@@ -448,6 +449,28 @@ while True:
                 bulletX_array.pop(i)
                 space_key_pressed -= 1
                 bulletImg_array.pop(i)    
+            bullet_mask_clones = pygame.mask.from_surface(bulletImg_array[i])
+            if turret_mask.overlap(bullet_mask_clones, (bulletX_array[i] - turret_rect.x, bulletY_array[i] - turret_rect.y)):
+                score = score + 1
+
+
+                if turret_rect.y >= 0:
+                    the_chosen_one = 0
+                    the_math = height - turret_rect.y
+                elif turret_rect.y < 0:
+                    the_chosen_one = 1
+                    the_math_2 = height + abs(turret_rect.y)
+
+
+                picked_coordinates = picked_coordinates + 1
+                turret_rect.x = level_one_positions_x[picked_coordinates]
+
+                if the_chosen_one == 0:
+                    turret_rect.y = level_one_positions_y[picked_coordinates] - the_math
+                elif the_chosen_one == 1:
+                    turret_rect.y = level_one_positions_y[picked_coordinates] - the_math_2
+            
+                
         
 
 
@@ -463,7 +486,7 @@ while True:
                 if game_speed < 5:
                     game_speed = game_speed + 1
 
-            if keys[pygame.K_SPACE] and secondsspacebar > 0.1:
+            if keys[pygame.K_SPACE] and secondsspacebar > 0.15:
                 ticks_spacebar=pygame.time.get_ticks()
                 space_key_pressed += 1
                 bullet_animation()
