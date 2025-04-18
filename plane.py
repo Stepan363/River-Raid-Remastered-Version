@@ -129,7 +129,7 @@ def bullet_animation():
     
     bulletImg_array.append(pygame.image.load("images/planes_bullet.png"))
     #plane_rect.#x or y
-    bulletX_array.append(plane_rect.x)
+    bulletX_array.append(plane_rect.x +  + randint(-20,20))
     bulletY_array.append(plane_rect.y)
     bullety_change.append(-15)
      
@@ -443,6 +443,7 @@ while True:
         
         for i in range(len(bulletImg_array )-1):
             bulletY_array[i] += -15
+            bulletX_array[i] += randint(-4,4)
             screen.blit(bulletImg_array[i], (bulletX_array[i], bulletY_array[i]))
             if bulletY_array[i] < 0:
                 bulletY_array.pop(i)
