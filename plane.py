@@ -9,7 +9,7 @@ https://the-image-editor.com/image/download/cmVzaXplX2ltYWdl
 #https://www.youtube.com/watch?v=H2r2N7D56Uw&ab_channel=TechWithTim
 import pygame
 pygame.font.init()
-
+pygame.mixer.init()
 
 
 from random import randint
@@ -55,6 +55,7 @@ planebullet_rect = plane_bullet.get_rect()
 
 
 
+  # loop forever
 
 plane = pygame.image.load("images/planne.png").convert_alpha()
 plane_mask = pygame.mask.from_surface(plane)
@@ -123,13 +124,30 @@ bulletX_array = []
 bulletY_array = []
 bullety_change = []
 
+
+
+
+#Audio handling:
+
+
+
+user_fired_weapon_sfx = pygame.mixer.Sound("sounds/laserShoot.wav")
+
+general_background_music = pygame.mixer.Sound("sounds/FinalFlight.wav")
+background_music_length = general_background_music.get_length()
+
+explosion1 = pygame.mixer.Sound("sounds/explosion.wav")
+explosion2 = pygame.mixer.Sound("sounds/explosion2.wav")
+main_audio = pygame.mixer.Channel(4)
+main_audio.play(general_background_music)
+
 def bullet_animation():
     global space_key_pressed
     print(space_key_pressed, len(bulletY_array))
     
     bulletImg_array.append(pygame.image.load("images/planes_bullet.png"))
     #plane_rect.#x or y
-    bulletX_array.append(plane_rect.x +  + randint(-20,20))
+    bulletX_array.append(plane_rect.x)
     bulletY_array.append(plane_rect.y)
     bullety_change.append(-15)
      
@@ -230,8 +248,8 @@ def plane_exploded():
     turret_rect.x = level_one_positions_x[picked_coordinates]
     turret_rect.y = level_one_positions_y[picked_coordinates]
     pygame.display.update()
-    pygame.mixer.music.load("sounds/explosion2.wav")
-    pygame.mixer.music.play()
+    exploded_channel1 = pygame.mixer.Channel(0)
+    exploded_channel1.play(explosion2)
     fade(width, height)
     game_speed = 3
     map_rect.y = -50000
@@ -239,8 +257,7 @@ def plane_exploded():
     turret_animation()
     map_rect2.y = -110000
     
-    pygame.mixer.music.load("sounds/sound2.wav")
-    pygame.mixer.music.play()
+    
 
 #game loop
 def plane_crashed():
@@ -253,8 +270,9 @@ def plane_crashed():
     picked_coordinates = 0
     turret_rect.x = level_one_positions_x[picked_coordinates]
     turret_rect.y = level_one_positions_y[picked_coordinates]
-    pygame.mixer.music.load("sounds/explosion.wav")
-    pygame.mixer.music.play()
+    exploded_channel2 = pygame.mixer.Channel(1)
+    exploded_channel2.play(explosion1)
+
     #loads images of exploded planes.
     plane1 = pygame.image.load('images/planne1_exp.png')
     plane2 = pygame.image.load('images/planne2_exp.png')
@@ -306,8 +324,8 @@ def plane_crashed():
         map_rect2.y = -110000
         picked_coordinates = 0
         score = 0
-        pygame.mixer.music.load("sounds/sound2.wav")
-        pygame.mixer.music.play()
+        
+        
         turret_animation()
 
         
@@ -359,14 +377,14 @@ def paused_game():
     
     
     
-pygame.mixer.music.load("sounds/sound2.wav")
-pygame.mixer.music.play()
+
 space_key_pressed = 0
 ticks_milsec=pygame.time.get_ticks()
 ticks_milsec1=pygame.time.get_ticks()
 ticks_milsec2=pygame.time.get_ticks()
 ticks_spacebar=pygame.time.get_ticks()
 moved_distance = 0
+milliseconds_bg_audio_playing=pygame.time.get_ticks()
 while True:
     pygame.font.init()
     my_font = pygame.font.SysFont('nanummyeongjo', 80)
@@ -388,9 +406,10 @@ while True:
     # audio playing, restarts track when ended.
     seconds=(pygame.time.get_ticks()-ticks_milsec)/1000
     if seconds >= 19:
-        pygame.mixer.music.load("sounds/sound2.wav")
+
+
         ticks_milsec=pygame.time.get_ticks()
-        pygame.mixer.music.play()
+
     #collision detection, with map or one of the turrets.
     if map_mask.overlap(plane_mask, (plane_rect.x - map_rect.x, plane_rect.y - map_rect.y)):
         #print("go!")
@@ -440,36 +459,44 @@ while True:
         #event handler from keyboard.
         keys = pygame.key.get_pressed()
 
-        
-        for i in range(len(bulletImg_array )-1):
-            bulletY_array[i] += -15
-            bulletX_array[i] += randint(-4,4)
-            screen.blit(bulletImg_array[i], (bulletX_array[i], bulletY_array[i]))
-            if bulletY_array[i] < 0:
-                bulletY_array.pop(i)
-                bulletX_array.pop(i)
-                space_key_pressed -= 1
-                bulletImg_array.pop(i)    
-            bullet_mask_clones = pygame.mask.from_surface(bulletImg_array[i])
-            if turret_mask.overlap(bullet_mask_clones, (bulletX_array[i] - turret_rect.x, bulletY_array[i] - turret_rect.y)):
-                score = score + 1
+        main_audio = pygame.mixer.Channel(4)
+        main_seconds_bg_audio=(pygame.time.get_ticks()-milliseconds_bg_audio_playing)/1000
+        if main_seconds_bg_audio >= background_music_length:
+            main_audio.play(general_background_music)
+
+        for i in range(len(bulletY_array)):
+            if i < len(bulletY_array):
+                bulletY_array[i] += -15
+                screen.blit(bulletImg_array[i], (bulletX_array[i], bulletY_array[i]))
+                
+                bullet_mask_clones = pygame.mask.from_surface(bulletImg_array[i])
+                if turret_mask.overlap(bullet_mask_clones, (bulletX_array[i] - turret_rect.x, bulletY_array[i] - turret_rect.y)):
+                    score = score + 1
 
 
-                if turret_rect.y >= 0:
-                    the_chosen_one = 0
-                    the_math = height - turret_rect.y
-                elif turret_rect.y < 0:
-                    the_chosen_one = 1
-                    the_math_2 = height + abs(turret_rect.y)
+                    if turret_rect.y >= 0:
+                        the_chosen_one = 0
+                        the_math = height - turret_rect.y
+                    elif turret_rect.y < 0:
+                        the_chosen_one = 1
+                        the_math_2 = height + abs(turret_rect.y)
 
 
-                picked_coordinates = picked_coordinates + 1
-                turret_rect.x = level_one_positions_x[picked_coordinates]
+                    picked_coordinates = picked_coordinates + 1
+                    turret_rect.x = level_one_positions_x[picked_coordinates]
 
-                if the_chosen_one == 0:
-                    turret_rect.y = level_one_positions_y[picked_coordinates] - the_math
-                elif the_chosen_one == 1:
-                    turret_rect.y = level_one_positions_y[picked_coordinates] - the_math_2
+                    if the_chosen_one == 0:
+                        turret_rect.y = level_one_positions_y[picked_coordinates] - the_math
+                    elif the_chosen_one == 1:
+                        turret_rect.y = level_one_positions_y[picked_coordinates] - the_math_2
+                
+                if bulletY_array[i] < 0:
+                    bulletY_array.pop(i)
+                    bulletX_array.pop(i)
+                    space_key_pressed -= 1
+                    bulletImg_array.pop(i)  
+                
+                    
             
                 
         
@@ -484,12 +511,14 @@ while True:
                 plane_rect.x = plane_rect.x - 2
             if keys[pygame.K_UP] and seconds1 > 0.1:
                 ticks_milsec1=pygame.time.get_ticks()
-                if game_speed < 8:
+                if game_speed < 9:
                     game_speed = game_speed + 1
 
-            if keys[pygame.K_SPACE] and secondsspacebar > 0.15:
+            if keys[pygame.K_SPACE] and secondsspacebar > 0.24:
                 ticks_spacebar=pygame.time.get_ticks()
                 space_key_pressed += 1
+                laser_pew = pygame.mixer.Channel(7)
+                laser_pew.play(user_fired_weapon_sfx)
                 bullet_animation()
                 
             if keys[pygame.K_DOWN] and seconds1 > 0.1:
@@ -513,5 +542,3 @@ while True:
         print(bulletY_array)
         print(space_key_pressed)
         pygame.quit()
-
-
