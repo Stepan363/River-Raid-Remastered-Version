@@ -49,7 +49,7 @@ WHITE = (255, 255, 255)
 pygame.mouse.set_visible(False)
 
 #creating plane, collision configuration and postition of aircraft.
-plane_bullet = pygame.image.load("images/planes_bullet.png").convert_alpha()
+plane_bullet = pygame.image.load("images/planes_bullet1.png").convert_alpha()
 planebullet_mask = pygame.mask.from_surface(plane_bullet)
 planebullet_rect = plane_bullet.get_rect()
 
@@ -143,9 +143,9 @@ main_audio.play(general_background_music)
 
 def bullet_animation():
     global space_key_pressed
-    print(space_key_pressed, len(bulletY_array))
+    #print(space_key_pressed, len(bulletY_array))
     
-    bulletImg_array.append(pygame.image.load("images/planes_bullet.png"))
+    bulletImg_array.append(pygame.image.load("images/planes_bullet1.png"))
     #plane_rect.#x or y
     bulletX_array.append(plane_rect.x)
     bulletY_array.append(plane_rect.y)
@@ -176,7 +176,7 @@ picked_coordinates = 0
 score = 0
 def turret_animation():
     global fps
-    fps = 100000
+    
     global turret, score, turret_rect, turret_mask, time_elapsed, picked_coordinates, level_one_positions_x, level_one_positions_y, the_math, the_math_2, the_chosen_one
     #if plane_crashed() == True:
     
@@ -204,8 +204,8 @@ def turret_animation():
     # turret_draw_on_screen
     #the place where they all teleport to their allocated places, after they disappear off screen.
     calculated_math_for_erase = height-(height/1.2)
-    clock = pygame.time.Clock()
-    clock.tick(fps)
+    #clock = pygame.time.Clock()
+    #clock.tick(fps)
     #print(picked_coordinates, turret_rect.x, turret_rect.y, plane_rect.y + calculated_math_for_erase)
     
     if turret_rect.y >= 0:
@@ -386,6 +386,13 @@ ticks_spacebar=pygame.time.get_ticks()
 moved_distance = 0
 milliseconds_bg_audio_playing=pygame.time.get_ticks()
 while True:
+    clock = pygame.time.Clock()
+    clock.tick()
+    
+    fps = clock.get_fps()
+    print(fps)
+
+
     pygame.font.init()
     my_font = pygame.font.SysFont('nanummyeongjo', 80)
     if map_rect.y < 0 and map_rect.y > -50000:
@@ -463,6 +470,7 @@ while True:
         main_seconds_bg_audio=(pygame.time.get_ticks()-milliseconds_bg_audio_playing)/1000
         if main_seconds_bg_audio >= background_music_length:
             main_audio.play(general_background_music)
+            milliseconds_bg_audio_playing=pygame.time.get_ticks()
 
         for i in range(len(bulletY_array)):
             if i < len(bulletY_array):
@@ -506,13 +514,14 @@ while True:
         #Controls of the map, and plane    
         if paused_game() == False:
             if keys[pygame.K_RIGHT] and plane_rect.x <= width - 30:
-                plane_rect.x = plane_rect.x + 2
+                plane_rect.x = plane_rect.x + 4
             if keys[pygame.K_LEFT] and plane_rect.x >= -8:
-                plane_rect.x = plane_rect.x - 2
+                plane_rect.x = plane_rect.x - 4
+
             if keys[pygame.K_UP] and seconds1 > 0.1:
                 ticks_milsec1=pygame.time.get_ticks()
-                if game_speed < 9:
-                    game_speed = game_speed + 1
+                if game_speed < 16:
+                    game_speed = game_speed + 2
 
             if keys[pygame.K_SPACE] and secondsspacebar > 0.24:
                 ticks_spacebar=pygame.time.get_ticks()
@@ -523,8 +532,8 @@ while True:
                 
             if keys[pygame.K_DOWN] and seconds1 > 0.1:
                 ticks_milsec1=pygame.time.get_ticks()
-                if game_speed > 1:
-                    game_speed = game_speed - 1
+                if game_speed > 4:
+                    game_speed = game_speed - 2
             seconds1=(pygame.time.get_ticks()-ticks_milsec1)/1000
             secondsspacebar=(pygame.time.get_ticks()-ticks_spacebar)/1000
     
@@ -533,7 +542,7 @@ while True:
         if event.type == pygame.QUIT:
             run = False
     #print(game_speed)
-    #updates display ( Very important for making games, I always forgot. )
+    #updates display ( Very important focr making games, I always forgot. )
     
     pygame.display.flip()
         #turretbul_rect.x = turret_rect.x + 70
