@@ -8,14 +8,27 @@ https://the-image-editor.com/image/download/cmVzaXplX2ltYWdl
 #screen fading code
 #https://www.youtube.com/watch?v=H2r2N7D56Uw&ab_channel=TechWithTim
 
-
+#helicopterImg_array[i] = pygame.transform.flip(helicopterImg_array[i], True, False)
+#flipping image code
 import pygame
 import random
 from random import randint
 import sys  
 import time
+import ctypes
+import settings
+
+from planebullet import *  # Importing the planebullet class
+from turretclass import *  
+
+ctypes.windll.user32.SetProcessDPIAware()
+#
+# # # Anywhere Before
+#
+
 pygame.init() 
 pygame.mixer.init()
+settings.init()
 
 pygame.font.init()
 #essentials to start the game.
@@ -101,9 +114,11 @@ math_height = height/1080
 map2 = pygame.image.load("images/Level-2.png").convert_alpha()
 map2 = pygame.transform.scale(map2, ((math*1000)+4, 50000))
 map2_mask = pygame.mask.from_surface(map2)
+map3 = pygame.image.load("images/Level-3.png").convert_alpha()
+map3 = pygame.transform.scale(map3, ((math*1000)+4, 50000))
+map3_mask = pygame.mask.from_surface(map3)
 
-
-map = pygame.image.load("images/Level-3.png").convert_alpha()
+map = pygame.image.load("images/Level-1.png").convert_alpha()
 
 map = pygame.transform.scale(map, ((math*1000)+4, 50000))
 main_mapmask = pygame.mask.from_surface(map)
@@ -133,7 +148,7 @@ turretbul_rect = turret_bul.get_rect()
 
 turretbul_rect.x = -9999
 
-game_speed = 3
+
 looped_times = -2
 
 time_elapsed=pygame.time.get_ticks()
@@ -166,6 +181,15 @@ main_audio = pygame.mixer.Channel(4)
 main_audio.play(general_background_music)
 #Audio handling:
 milliseconds_bg_audio_playing=pygame.time.get_ticks()
+turretbulx_array = []
+turretbuly_array = []
+turretbul_img_array = []
+def turret_bullet_animation():
+    global turretbulx_array, turretbuly_array, turretbul_img_array
+    
+    #print(turretbul_rect.x, turretbul_rect.y)
+    
+
 def music_handling():
     global music1, music2, music3, general_background_music, milliseconds_bg_audio_playing
     main_audio = pygame.mixer.Channel(4)
@@ -194,7 +218,7 @@ def map_algorithim():
     math = width/1000
     
     #print(main_maprect.y)
-    if main_maprect.y >= 0:   
+    if main_maprect.y >= 0 and level == 1:   
 
         level = 2
         main_map = map2
@@ -202,6 +226,14 @@ def map_algorithim():
         main_maprect = map2.get_rect()
         main_maprect.y = -50000
         main_mapmask = pygame.mask.from_surface(map2)
+    if main_maprect.y >= 1000 and level == 2:   
+
+        level = 3
+        main_map = map3
+        
+        main_maprect = map3.get_rect()
+        main_maprect.y = -50000
+        main_mapmask = pygame.mask.from_surface(map3)
         
     screen.blit(main_map, main_maprect)
     #print(main_maprect.y)
@@ -273,7 +305,7 @@ def turret_animation():
 
     global turret, score, turret_rect, turret_mask, time_elapsed,  the_math, the_math_2,  distance_passed, target_distance
     #if plane_crashed() == True:
-    distance_passed += game_speed
+    distance_passed += settings.game_speed
 
     if distance_passed >= target_distance:
         distance_passed = 0
@@ -300,7 +332,14 @@ def turret_animation():
             
             turretx_array.append(x)
             turrety_array.append(y)
-        
+    for i in range(len(turretimg_array)):
+        if i < len(turrety_array):
+        #print(turret_rect.x, turret_rect.y)
+            if turrety_array[i] > height:
+                turretx_array.pop(i)
+                turrety_array.pop(i)
+                turretimg_array.pop(i)
+            
         
         
         
@@ -378,8 +417,8 @@ def fuel_bar():
 
 
 def plane_exploded():
-    global turretx_array, turrety_array, turretimg_array, game_speed,the_math, the_math_2 , score, fuel, red_hue, green_hue, width_length, helicopterX_array, helicopterY_array, helicopterImg_array, helicopter_direction_array 
-    game_speed = 0
+    global turretx_array, turrety_array, turretimg_array,the_math, the_math_2 , score, fuel, red_hue, green_hue, width_length, helicopterX_array, helicopterY_array, helicopterImg_array, helicopter_direction_array 
+    settings.game_speed = 0
     score = 0
     the_math = 0
     the_math_2 = 0
@@ -389,7 +428,7 @@ def plane_exploded():
     exploded_channel1 = pygame.mixer.Channel(6)
     exploded_channel1.play(explosion2)
 
-    game_speed = 3
+    settings.game_speed = 3
     main_maprect.y = -50000
     #turret_rect.y = -1000
     turret_animation()
@@ -525,8 +564,11 @@ def quit_game():
         pygame.quit()
     if keys[pygame.K_F4] and keys[pygame.K_LALT]:
         pygame.quit()
-    
+
 pygame.display.toggle_fullscreen()
+screen = pygame.display.set_mode()
+width, height = screen.get_size()
+print(width, height, "HERE")
 #------------------------------------------------
 
 seconds = 0
@@ -549,6 +591,9 @@ milliseconds_bg_audio_playing=pygame.time.get_ticks()
 menu = 1
 helicopterspawnrate = 500
 level = 1
+    
+plane_bullets = []
+
 while True:
     #print(main_maprect.y)
     music_handling()
@@ -558,7 +603,7 @@ while True:
     map_algorithim()
     for i in range(len(turretimg_array)):
         screen.blit(turretimg_array[i], (turretx_array[i], turrety_array[i]))
-        turrety_array[i] += game_speed
+        turrety_array[i] += settings.game_speed
     if menu == 1:
         my_font = pygame.font.SysFont('nanummyeongjo', 80)
         
@@ -577,11 +622,11 @@ while True:
         if height+random.randint(300,700) < fuel_collection_rect3.y or main_mapmask.overlap(fuelcollection_mask3, (fuel_collection_rect3.x - main_maprect.x, fuel_collection_rect3.y - main_maprect.y)): 
             fuel_collection_rect3.x = random_int
             fuel_collection_rect3.y = random_int2
-        if height+100 < helicopter_rect.y: 
+        if height+random.randint(300,800) < helicopter_rect.y: 
             helicopter_rect.x = random.randint(0,width)
             helicopter_rect.y = random.randint(-3500,-500)
         
-        blocks_passed += game_speed
+        blocks_passed += settings.game_speed
         #print(blocks_passed, helicopterspawnrate)
 
         if blocks_passed >= helicopterspawnrate:
@@ -591,7 +636,7 @@ while True:
             helicopterImg_array.append(pygame.image.load("images/helicopter.png"))
             check_island_spawn = random.randint(0, width)
             helicopterY_array.append(-300)
-            print("hi")
+            #7print("hi")
             for i in range(len(helicopterImg_array)):
                 helicopter_mask_clones = pygame.mask.from_surface(helicopterImg_array[i])
                 while main_mapmask.overlap(helicopter_mask_clones, (check_island_spawn - main_maprect.x, helicopterY_array[i] - main_maprect.y)):
@@ -606,14 +651,10 @@ while True:
                 helicopter_direction_array.append(1)
             else:
                 helicopter_direction_array.append(2)
+                helicopterImg_array[i] = pygame.transform.flip(helicopterImg_array[i], True, False)
         
         for i in range(len(helicopterImg_array)):
-            
-            
-            
-
             if i < len(helicopterY_array):
-                #print(len(helicopterY_array))
                 if plane_mask.overlap(helicopter_mask_clones, (helicopterX_array[i] - plane_rect.x, helicopterY_array[i] - plane_rect.y)):
                     helicopterY_array = []
                     helicopterX_array = []
@@ -623,30 +664,22 @@ while True:
                     plane_crashed()
                     score = 0
                     break
-                
-                helicopterY_array[i] += game_speed
+                helicopterY_array[i] += settings.game_speed
                 if helicopter_direction_array[i] == 1:
-                    helicopterX_array[i] -= 2
+                    helicopterX_array[i] -= 4
                 else:
-                    helicopterX_array[i] += 2
-
+                    helicopterX_array[i] += 4
                 helicopter_mask_clones = pygame.mask.from_surface(helicopterImg_array[i])
                 if main_mapmask.overlap(helicopter_mask_clones, (helicopterX_array[i] - main_maprect.x, helicopterY_array[i] - main_maprect.y)) or helicopterX_array[i] <= 0 or helicopterX_array[i] >= width:
                     if helicopter_direction_array[i] == 1:
                         helicopter_direction_array[i] = 2
+                        helicopterX_array[i] += 16
+                        helicopterImg_array[i] = pygame.transform.flip(helicopterImg_array[i], True, False)
                     else:
                         helicopter_direction_array[i] = 1
-
+                        helicopterX_array[i] -= 16
+                        helicopterImg_array[i] = pygame.transform.flip(helicopterImg_array[i], True, False)
                 screen.blit(helicopterImg_array[i], (helicopterX_array[i], helicopterY_array[i]))
-                
-                    
-                
-                #if turret_mask.overlap(helicopter_maskagggg_clones, (helicopterX_array[i] - turret_rect.x, helicopterY_array[i] - turret_rect.y)):
-                #    plane_exploded()
-
-                
-
-
                 if helicopterY_array[i] > height:
                     helicopterY_array.pop(i)
                     helicopterX_array.pop(i)
@@ -678,18 +711,18 @@ while True:
             if 1 == 1:
                 if turret_rect.y < -50:
                     pass
-                main_maprect.y = main_maprect.y + game_speed
+                main_maprect.y = main_maprect.y + settings.game_speed
 
-                turret_rect.y = turret_rect.y + game_speed
-                fuel_collection_rect.y = fuel_collection_rect.y + game_speed
-                fuel_collection_rect2.y = fuel_collection_rect2.y + game_speed
-                fuel_collection_rect3.y = fuel_collection_rect3.y + game_speed
+                turret_rect.y = turret_rect.y + settings.game_speed
+                fuel_collection_rect.y = fuel_collection_rect.y + settings.game_speed
+                fuel_collection_rect2.y = fuel_collection_rect2.y + settings.game_speed
+                fuel_collection_rect3.y = fuel_collection_rect3.y + settings.game_speed
                 
 
-                #print(game_speed)
+                #print(settings.game_speed)
             else:
-                game_speed = 0
-            moved_distance = moved_distance + game_speed
+                settings.game_speed = 0
+            moved_distance = moved_distance + settings.game_speed
             #get mouse coordinates
             pos = pygame.mouse.get_pos()
             #print(pos[0]/math, pos[1]-moved_distance)
@@ -723,13 +756,14 @@ while True:
             for i in range(len(bulletImg_array)):
                 for j in range(len(turretimg_array)):
                     if i < len(bulletY_array) and j < len(turretimg_array):
+                        #bullet.rect.x
                         bullet_mask_clones = pygame.mask.from_surface(bulletImg_array[i])
                         if turret_mask.overlap(bullet_mask_clones, (bulletX_array[i] - turretx_array[j], bulletY_array[i] - turrety_array[j])):
                             score += 1
                             turretx_array.pop(j)
                             turrety_array.pop(j)
                             turretimg_array.pop(j)
- 
+            
             for i in range(len(bulletImg_array)):
                 for j in range(len(helicopterImg_array)):
                     if i < len(bulletY_array) and j < len(helicopterImg_array):
@@ -810,12 +844,11 @@ while True:
                     plane_rect.x = plane_rect.x + 3
                 if keys[pygame.K_LEFT] and plane_rect.x >= -8:
                     plane_rect.x = plane_rect.x - 3
-                if keys[pygame.K_z]:
-                    main_maprect.y = -2000
+                
                 if keys[pygame.K_UP] and seconds1 > 0.1:
                     ticks_milsec1=pygame.time.get_ticks()
-                    if game_speed < 5:
-                        game_speed = game_speed + 1
+                    if settings.game_speed < 5:
+                        settings.game_speed = settings.game_speed + 1
 
                 if keys[pygame.K_SPACE] and secondsspacebar > 0.3:
                     
@@ -823,12 +856,28 @@ while True:
                     space_key_pressed += 1
                     laser_pew = pygame.mixer.Channel(7)
                     laser_pew.play(user_fired_weapon_sfx)
-                    bullet_animation()
+                    plane_bullets.append(Planebullet(plane_rect))
+                for bullet in plane_bullets[:]:
+                    for j in range(len(turretx_array)):
+                        if j >= len(turretx_array):
+                            break
+                        assert j < len(turretx_array)  
+                        
+                        bullet_mask_clones = pygame.mask.from_surface(bullet.image)
+                        if turret_mask.overlap(bullet_mask_clones, (bullet.rect.x - turretx_array[j], bullet.rect.y - turrety_array[j])):
+                            score += 1
+                            turretx_array.pop(j)
+                            turrety_array.pop(j)
+                            turretimg_array.pop(j)
+                    bullet.update()
+                    bullet.draw(screen)
+                    if bullet.off_screen(height):
+                        plane_bullets.remove(bullet)
                              
                 if keys[pygame.K_DOWN] and seconds1 > 0.1:
                     ticks_milsec1=pygame.time.get_ticks()
-                    if game_speed > 1:
-                        game_speed = game_speed - 1
+                    if settings.game_speed > 1:
+                        settings.game_speed = settings.game_speed - 1
                 seconds1=(pygame.time.get_ticks()-ticks_milsec1)/1000
                 secondsspacebar=(pygame.time.get_ticks()-ticks_spacebar)/1000
         
@@ -836,7 +885,7 @@ while True:
 
             if event.type == pygame.QUIT:
                 run = False
-        #print(game_speed)
+        #print(settings.game_speed)
         #updates display ( Very important focr making games, I always forgot. )
     
     
