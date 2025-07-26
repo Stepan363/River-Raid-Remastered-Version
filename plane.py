@@ -156,9 +156,6 @@ time_elapsed=pygame.time.get_ticks()
 
 
 
-bulletImg_array = []
-bulletX_array = []
-bulletY_array = []
 
 lvl1 = pygame.transform.scale(map, ((math*1000)+4, 50000))
 
@@ -171,7 +168,7 @@ music2 = pygame.mixer.Sound("sounds/FinalFlight.wav")
 music3 = pygame.mixer.Sound("sounds/PixelatedDreams.wav")
 music4 = pygame.mixer.Sound("sounds/unearthlylogistics.wav")
 music5 =pygame.mixer.Sound("sounds/pianoclonkers.wav")
-num = random.randint(1,3)
+num = random.randint(1,5)
 
 if num == 1:
     general_background_music = music1
@@ -273,12 +270,9 @@ explosion2 = pygame.mixer.Sound("sounds/explosion2.wav")
 
 def bullet_animation():
     global space_key_pressed
-    #print(space_key_pressed, len(bulletY_array))
+
     
-    bulletImg_array.append(pygame.image.load("images/planes_bullet1.png"))
-    #plane_rect.#x or y
-    bulletX_array.append(plane_rect.x)
-    bulletY_array.append(plane_rect.y)
+    return
 
 
 
@@ -345,6 +339,7 @@ def turret_animation():
         
         turretx_array.append(x)
         turrety_array.append(y)
+'''
 for i in range(len(turretimg_array)):
     if i < len(turrety_array):
     #print(turret_rect.x, turret_rect.y)
@@ -385,7 +380,7 @@ for i in range(len(turretimg_array)):
     
     #when the turret disappears out of view, move it to it's new position. 
     
-    
+'''
     
 #percentage of fuel at the start of the game.
 red_hue = 0
@@ -426,8 +421,14 @@ def fuel_bar():
     
 
     
+turretsbullet_array = []
+def bullet_animationturrets():
+    global turret_class_array
+    for i in range(turret_class_array):
+        assert i < len(turret_class_array) 
+        bullet = pygame.image.load('images/turret_bullet.png')
 
-    
+
 
 
 def plane_exploded():
@@ -576,8 +577,12 @@ def plane_crashed():
 def quit_game():
     keys = pygame.key.get_pressed()
     if keys[pygame.K_q]:
+        for i in range(50):
+            print("CODE QUIT, USER HAS EXITED GAME")
         pygame.quit()
     if keys[pygame.K_F4] and keys[pygame.K_LALT]:
+        for i in range(50):
+            print("CODE QUIT, USER HAS EXITED GAME")
         pygame.quit()
 
 #pygame.display.toggle_fullscreen()
@@ -847,61 +852,7 @@ while True:
             #event handler from keyboard.
             keys = pygame.key.get_pressed()
             fuel_bar()
-            for i in range(len(bulletImg_array)):
-                for j in range(len(turretimg_array)):
-                    if i < len(bulletY_array) and j < len(turretimg_array):
-                        #bullet.rect.x
-                        bullet_mask_clones = pygame.mask.from_surface(bulletImg_array[i])
-                        if turret_mask.overlap(bullet_mask_clones, (bulletX_array[i] - turretx_array[j], bulletY_array[i] - turrety_array[j])):
-                            score += 1
-                            turretx_array.pop(j)
-                            turrety_array.pop(j)
-                            turretimg_array.pop(j)
             
-            for i in range(len(bulletImg_array)):
-                for j in range(len(helicopterImg_array)):
-                    if i < len(bulletY_array) and j < len(helicopterImg_array):
-                        bullet_mask_clones = pygame.mask.from_surface(bulletImg_array[i])
-                        if helicopter_mask.overlap(bullet_mask_clones, (bulletX_array[i] - helicopterX_array[j], bulletY_array[i] - helicopterY_array[j])):
-                            score += 1
-                            helicopterY_array.pop(j)
-                            helicopterX_array.pop(j)
-                            helicopterImg_array.pop(j)
-                            helicopter_direction_array.pop(j)
-                            
-            for i in range(len(bulletY_array)):
-                if i < len(bulletY_array):
-                    if fuelcollection_mask3.overlap(planebullet_mask ,(bulletX_array[i] - fuel_collection_rect3.x, bulletY_array[i] - fuel_collection_rect3.y)):
-                        score += 10
-                        fuel_collection_rect3.x = random.randint(-3500, -600)
-                        fuel_collection_rect3.y = random.randint(50, width-50)
-                    if fuelcollection_mask2.overlap(planebullet_mask ,(bulletX_array[i] - fuel_collection_rect2.x, bulletY_array[i] - fuel_collection_rect2.y)):
-                        score += 10
-                        fuel_collection_rect2.x = random.randint(-3500, -600)
-                        fuel_collection_rect2.y = random.randint(50, width-50)
-                    if fuelcollection_mask.overlap(planebullet_mask ,(bulletX_array[i] - fuel_collection_rect.x, bulletY_array[i] - fuel_collection_rect.y)):
-                        score += 10
-                        fuel_collection_rect.x = random.randint(-3500, -600)
-                        fuel_collection_rect.y = random.randint(50, width-50)
-            for i in range(len(bulletY_array)):
-                if i < len(bulletY_array):
-                    bulletY_array[i] += -6
-                    screen.blit(bulletImg_array[i], (bulletX_array[i], bulletY_array[i]))
-                    
-                    bullet_mask_clones = pygame.mask.from_surface(bulletImg_array[i])
-                    if turret_mask.overlap(bullet_mask_clones, (bulletX_array[i] - turret_rect.x, bulletY_array[i] - turret_rect.y)):
-                        score = score + 1
-
-
-                        
-
-                    
-                    
-                    if bulletY_array[i] < 0:
-                        bulletY_array.pop(i)
-                        bulletX_array.pop(i)
-                        space_key_pressed -= 1
-                        bulletImg_array.pop(i)  
 
 
                 
@@ -941,7 +892,7 @@ while True:
                 
                 if keys[pygame.K_UP] and seconds1 > 0.1:
                     ticks_milsec1=pygame.time.get_ticks()
-                    if settings.game_speed < 5:
+                    if settings.game_speed < 6:
                         settings.game_speed = settings.game_speed + 1
 
                 if keys[pygame.K_SPACE] and secondsspacebar > 0.3:
